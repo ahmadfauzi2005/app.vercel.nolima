@@ -47,4 +47,22 @@ async function loadShopProducts() {
     });
 }
 
+async function loadMenuCategories() {
+    const { data: categories, error } = await supabase.from('categories').select('*').eq('status', 'active');
+    if (error) {
+        console.error('Error loading categories:', error);
+        return;
+    }
+
+    const menuList = document.getElementById('menu-list');
+    const contactItem = menuList.querySelector('li:last-child');
+
+    categories.forEach(cat => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="product.html?category=${encodeURIComponent(cat.name)}">${cat.name}</a>`;
+        menuList.insertBefore(li, contactItem);
+    });
+}
+
+loadMenuCategories();
 loadShopProducts();
