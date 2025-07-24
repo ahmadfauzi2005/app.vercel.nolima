@@ -103,7 +103,7 @@ async function loadProducts() {
             <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
             <td>${p.name}</td>
             <td>${categoryName}</td>
-            <td>$${p.price}</td>
+            <td>Rp${p.price.toLocaleString('id-ID')}</td>
             <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td></tr>`;
     });
 }
