@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex">
+  <!-- Sidebar -->
+  <div class="w-64 bg-white h-screen p-4 shadow flex flex-col">
+    <h2 class="text-xl font-bold text-indigo-600 mb-6">Admin Panel</h2>
+    <nav class="flex-1 space-y-2">
+      <button id="show-dashboard" class="w-full text-left px-4 py-2 hover:bg-indigo-100 rounded">Dashboard</button>
+      <button id="show-categories" class="w-full text-left px-4 py-2 hover:bg-indigo-100 rounded">Categories</button>
+      <button id="show-products" class="w-full text-left px-4 py-2 hover:bg-indigo-100 rounded">Products</button>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 p-6 overflow-y-auto">
+    <h1 class="text-2xl font-bold mb-4" id="page-title">Dashboard</h1>
+
+    <div id="dashboard-section">
+      <p>Welcome, Admin! Use the menu to manage your store.</p>
+    </div>
+
+    <div id="categories-section" class="hidden">
+      <button id="add-category" class="bg-indigo-600 text-white px-4 py-2 rounded mb-4">Add Category</button>
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-200"><tr><th class="py-2 px-4">Name</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="categories-table" class="text-center"></tbody>
+      </table>
+    </div>
+
+    <div id="products-section" class="hidden">
+      <button id="add-product" class="bg-indigo-600 text-white px-4 py-2 rounded mb-4">Add Product</button>
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-200"><tr><th>Image</th><th>Name</th><th>Price</th><th>Actions</th></tr></thead>
+        <tbody id="products-table" class="text-center"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white p-4 rounded w-96">
+      <h2 class="text-xl font-bold mb-2">Category</h2>
+      <form id="category-form">
+        <input type="hidden" id="category-id">
+        <input id="category-name" placeholder="Name" class="border w-full mb-2 p-2" required>
+        <select id="category-status" class="border w-full mb-2 p-2">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="cancel-category" class="bg-gray-300 px-3 py-1 rounded">Cancel</button>
+          <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+    <div class="bg-white p-4 rounded w-96">
+      <h2 class="text-xl font-bold mb-2">Product</h2>
+      <form id="product-form">
+        <input type="hidden" id="product-id">
+        <input id="product-name" placeholder="Name" class="border w-full mb-2 p-2" required>
+        <input id="product-price" type="number" placeholder="Price" class="border w-full mb-2 p-2" required>
+        <input type="file" id="product-image" class="mb-2" accept="image/*">
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="cancel-product" class="bg-gray-300 px-3 py-1 rounded">Cancel</button>
+          <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS Module -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
