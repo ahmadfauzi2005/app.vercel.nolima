@@ -48,16 +48,30 @@ window.deleteCategory = async (id) => {
 };
 async function saveCategory(e) {
     e.preventDefault();
+    const saveBtn = document.getElementById('save-category-btn');
+    const spinner = document.getElementById('category-spinner');
+
+    saveBtn.disabled = true;
+    spinner.classList.remove('hidden');
+
     const id = document.getElementById('category-id').value;
     const name = document.getElementById('category-name').value;
     const status = document.getElementById('category-status').value;
-    if (id) {
-        await supabase.from('categories').update({ name, status }).eq('id', id);
-    } else {
-        await supabase.from('categories').insert([{ name, status }]);
+
+    try {
+        if (id) {
+            await supabase.from('categories').update({ name, status }).eq('id', id);
+        } else {
+            await supabase.from('categories').insert([{ name, status }]);
+        }
+
+        toggleModal('category', false);
+        loadCategories();
+        loadCategoryOptions();
+    } finally {
+        saveBtn.disabled = false;
+        spinner.classList.add('hidden');
     }
-    toggleModal('category', false);
-    loadCategories();
 }
 
 // Product CRUD
@@ -102,6 +116,12 @@ window.deleteProduct = async (id) => {
 
 async function saveProduct(e) {
     e.preventDefault();
+    const saveBtn = document.getElementById('save-product-btn');
+    const spinner = document.getElementById('product-spinner');
+
+    saveBtn.disabled = true;
+    spinner.classList.remove('hidden');
+
     const name = document.getElementById('product-name').value;
     const price = parseFloat(document.getElementById('product-price').value);
     const categoryId = parseInt(document.getElementById('product-category').value);
@@ -127,9 +147,15 @@ async function saveProduct(e) {
     await supabase.from('products').insert([{
         name, price, image_url: imageUrl, category_id: categoryId
     }]);
+
     toggleModal('product', false);
     loadProducts();
+    loadCategoryOptions();
+
+    saveBtn.disabled = false;
+    spinner.classList.add('hidden');
 }
+
 
 
 // Modal toggle

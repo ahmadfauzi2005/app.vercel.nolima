@@ -74,7 +74,16 @@
                 </select>
                 <div class="flex justify-end space-x-2">
                     <button type="button" id="cancel-category" class="bg-gray-300 px-3 py-1 rounded">Cancel</button>
-                    <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded">Save</button>
+                    <button id="save-category-btn" type="submit"
+                        class="bg-indigo-600 text-white px-3 py-1 rounded flex items-center justify-center gap-2">
+                        <span>Save</span>
+                        <svg id="category-spinner" class="hidden animate-spin h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </button>
                 </div>
             </form>
         </div>
@@ -92,10 +101,19 @@
                     <option value="">Select Category</option>
                     <!-- Populated by JS -->
                 </select>
-                
+
                 <div class="flex justify-end space-x-2">
                     <button type="button" id="cancel-product" class="bg-gray-300 px-3 py-1 rounded">Cancel</button>
-                    <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded">Save</button>
+                    <button id="save-product-btn" type="submit"
+                        class="bg-indigo-600 text-white px-3 py-1 rounded flex items-center justify-center gap-2">
+                        <span>Save</span>
+                        <svg id="product-spinner" class="hidden animate-spin h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </button>
                 </div>
             </form>
         </div>
