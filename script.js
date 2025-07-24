@@ -64,28 +64,47 @@ async function saveCategory(e) {
 document.getElementById('add-product').onclick = () => toggleModal('product', true);
 document.getElementById('cancel-product').onclick = () => toggleModal('product', false);
 document.getElementById('product-form').onsubmit = saveProduct;
+async function loadCategoryOptions() {
+    const { data } = await supabase.from('categories').select('*');
+    const select = document.getElementById('product-category');
+    select.innerHTML = '<option value="">Select Category</option>';
+    data.forEach(cat => {
+        select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+    });
+}
 
 async function loadProducts() {
-  const { data } = await supabase.from('products').select('*');
-  const table = document.getElementById('products-table');
-  table.innerHTML = '';
-  data.forEach(p => {
-    table.innerHTML += `<tr>
-      <td><img src="${p.image_url}" class="w-16 h-16 mx-auto"/></td>
-      <td>${p.name}</td><td>$${p.price}</td>
-      <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td></tr>`;
-  });
+    const { data } = await supabase
+        .from('products')
+        .select('*, categories(name)');  // join category
+
+    const table = document.getElementById('products-table');
+    table.innerHTML = '';
+    data.forEach(p => {
+        const imageUrl = p.image_url;
+        const categoryName = p.categories ? p.categories.name : 'Uncategorized';
+        table.innerHTML += `<tr>
+            <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
+            <td>${p.name}</td>
+            <td>${categoryName}</td>
+            <td>$${p.price}</td>
+            <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td></tr>`;
+    });
 }
+
+
 window.deleteProduct = async (id) => {
     if (confirm('Delete product?')) {
         await supabase.from('products').delete().eq('id', id);
         loadProducts();
     }
 };
+
 async function saveProduct(e) {
     e.preventDefault();
     const name = document.getElementById('product-name').value;
     const price = parseFloat(document.getElementById('product-price').value);
+    const categoryId = parseInt(document.getElementById('product-category').value);
     const file = document.getElementById('product-image').files[0];
 
     let imageUrl = '';
@@ -99,14 +118,15 @@ async function saveProduct(e) {
             const { data: publicData } = supabase.storage
                 .from('products')
                 .getPublicUrl(filePath);
-
             imageUrl = publicData.publicUrl;
         } else {
             console.error("Upload error:", uploadError.message);
         }
     }
 
-    await supabase.from('products').insert([{ name, price, image_url: imageUrl }]);
+    await supabase.from('products').insert([{
+        name, price, image_url: imageUrl, category_id: categoryId
+    }]);
     toggleModal('product', false);
     loadProducts();
 }
@@ -120,3 +140,4 @@ function toggleModal(id, show) {
 // Init
 loadCategories();
 loadProducts();
+loadCategoryOptions();
