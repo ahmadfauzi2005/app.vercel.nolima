@@ -95,7 +95,7 @@ if (categoryName) {
         productContainer.innerHTML = '';
         products.forEach(p => {
             productContainer.innerHTML += `
-        <div class="single-product">
+      <div class="single-product border p-2 rounded shadow bg-white">
           <div class="product-image pos-rel">
             <a href="shop-details.html"><img src="${p.image_url}" alt="${p.name}"></a>
             <div class="product-action">
