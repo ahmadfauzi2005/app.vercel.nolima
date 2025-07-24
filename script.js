@@ -39,11 +39,13 @@ window.editCategory = async (id) => {
     document.getElementById('category-name').value = data.name;
     document.getElementById('category-status').value = data.status;
     toggleModal('category', true);
+    loadCategoryOptions();
 };
 window.deleteCategory = async (id) => {
     if (confirm('Delete category?')) {
         await supabase.from('categories').delete().eq('id', id);
         loadCategories();
+        loadCategoryOptions();
     }
 };
 async function saveCategory(e) {
