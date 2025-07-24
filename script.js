@@ -94,10 +94,19 @@ async function saveProduct(e) {
 
     let imageUrl = '';
     if (file) {
-        const { data, error } = await supabase.storage.from('products').upload(`images/${Date.now()}_${file.name}`, file);
-        if (!error) {
-            const { publicURL } = supabase.storage.from('products').getPublicUrl(data.path);
-            imageUrl = publicURL;
+        const filePath = `images/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('products')
+            .upload(filePath, file);
+
+        if (!uploadError) {
+            const { data: publicData } = supabase.storage
+                .from('products')
+                .getPublicUrl(filePath);
+
+            imageUrl = publicData.publicUrl;
+        } else {
+            console.error("Upload error:", uploadError.message);
         }
     }
 
@@ -105,6 +114,7 @@ async function saveProduct(e) {
     toggleModal('product', false);
     loadProducts();
 }
+
 
 // Modal toggle
 function toggleModal(id, show) {
