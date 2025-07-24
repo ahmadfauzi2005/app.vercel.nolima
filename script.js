@@ -66,20 +66,16 @@ document.getElementById('cancel-product').onclick = () => toggleModal('product',
 document.getElementById('product-form').onsubmit = saveProduct;
 
 async function loadProducts() {
-    const { data } = await supabase.from('products').select('*');
-    const table = document.getElementById('products-table');
-    table.innerHTML = '';
-
-    data.forEach(p => {
-        const imageUrl = `https://kpspglomfamxnhhopecp.supabase.co/storage/v1/object/public/products/${p.image_url}`;
-
-        table.innerHTML += `<tr>
-      <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
+  const { data } = await supabase.from('products').select('*');
+  const table = document.getElementById('products-table');
+  table.innerHTML = '';
+  data.forEach(p => {
+    table.innerHTML += `<tr>
+      <td><img src="${p.image_url}" class="w-16 h-16 mx-auto"/></td>
       <td>${p.name}</td><td>$${p.price}</td>
       <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td></tr>`;
-    });
+  });
 }
-
 window.deleteProduct = async (id) => {
     if (confirm('Delete product?')) {
         await supabase.from('products').delete().eq('id', id);
