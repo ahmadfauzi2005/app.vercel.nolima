@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/detail/*"
+  to = "/detail.html"
+  status = 200
