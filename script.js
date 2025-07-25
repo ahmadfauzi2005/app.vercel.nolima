@@ -88,17 +88,26 @@ async function loadCategoryOptions() {
         select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
     });
 }
+function generateSlug(name) {
+    return name.toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')   // hapus karakter aneh
+        .replace(/\s+/g, '-')           // ganti spasi dengan -
+        .replace(/-+/g, '-');           // hapus duplikat -
+}
 
 async function loadProducts() {
     const { data } = await supabase
         .from('products')
-        .select('*, categories(name)'); // join category
+        .select('*, categories(name)');
 
     const table = document.getElementById('products-table');
     table.innerHTML = '';
     data.forEach(p => {
         const imageUrl = p.image_url;
         const categoryName = p.categories ? p.categories.name : 'Uncategorized';
+        const qrUrl = `${window.location.origin}/detail/${p.barcode}`;
+        const qrCanvasId = `qr-${p.id}`;
 
         table.innerHTML += `<tr>
             <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
@@ -106,23 +115,27 @@ async function loadProducts() {
             <td>${categoryName}</td>
             <td>Rp${p.price.toLocaleString('id-ID')}</td>
             <td>
-                ${p.qr_url ? `
-                    <img src="${p.qr_url}" class="w-16 h-16 mx-auto" alt="QR Code"/>
-                    <button onclick="downloadQR('${p.qr_url}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
-                ` : '-'}
+                <canvas id="${qrCanvasId}" width="100" height="100"></canvas><br>
+                <button onclick="downloadQR('${qrCanvasId}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
             </td>
             <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td>
         </tr>`;
+
+        setTimeout(() => {
+            const canvas = document.getElementById(qrCanvasId);
+            QRCode.toCanvas(canvas, qrUrl, function (error) {
+                if (error) console.error(error);
+            });
+        }, 0);
     });
 }
 
-function downloadQR(imgUrl, name) {
-    const link = document.createElement("a");
-    link.href = imgUrl;
+function downloadQR(canvasId, name) {
+    const canvas = document.getElementById(canvasId);
+    const link = document.createElement('a');
     link.download = `qr-${name}.png`;
-    document.body.appendChild(link);
+    link.href = canvas.toDataURL("image/png");
     link.click();
-    document.body.removeChild(link);
 }
 
 
@@ -145,53 +158,54 @@ async function saveProduct(e) {
     const price = parseFloat(document.getElementById('product-price').value);
     const categoryId = parseInt(document.getElementById('product-category').value);
     const file = document.getElementById('product-image').files[0];
-    const slug = name.toLowerCase().replace(/\s+/g, '');
+    const slug = generateSlug(name);
+    const barcode = slug;  // Simpan slug sebagai barcode
 
-    let imageUrl = '', qrUrl = '';
+    let imageUrl = '';
+    if (file) {
+        const filePath = `images/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('products')
+            .upload(filePath, file);
 
-    try {
-        // Upload product image
-        if (file) {
-            const filePath = `images/${Date.now()}_${file.name}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage.from('products').upload(filePath, file);
-            if (!uploadError) {
-                imageUrl = supabase.storage.from('products').getPublicUrl(filePath).data.publicUrl;
-            } else {
-                console.error("Upload error:", uploadError.message);
-            }
-        }
-
-        // Generate QR Code to detail.html?slug=...
-        const qrCanvas = document.createElement('canvas');
-        const qrLink = `${window.location.origin}/detail.html?slug=${slug}`;
-
-        await QRCode.toCanvas(qrCanvas, qrLink);
-        const blob = await new Promise(resolve => qrCanvas.toBlob(resolve, 'image/png'));
-        const qrPath = `qrs/${Date.now()}_${slug}.png`;
-
-        const { error: qrUploadError } = await supabase.storage.from('qrcodes').upload(qrPath, blob);
-        if (!qrUploadError) {
-            qrUrl = supabase.storage.from('qrcodes').getPublicUrl(qrPath).data.publicUrl;
+        if (!uploadError) {
+            const { data: publicData } = supabase.storage
+                .from('products')
+                .getPublicUrl(filePath);
+            imageUrl = publicData.publicUrl;
         } else {
-            console.error("QR Upload Error:", qrUploadError.message);
+            console.error("Upload error:", uploadError.message);
         }
-
-        // Save to products table
-        await supabase.from('products').insert([{
-            name, price, image_url: imageUrl, category_id: categoryId,
-            barcode: slug, qr_url: qrUrl
-        }]);
-
-        toggleModal('product', false);
-        loadProducts();
-        loadCategoryOptions();
-
-    } finally {
-        saveBtn.disabled = false;
-        spinner.classList.add('hidden');
     }
-}
 
+    // Generate QR Code (pakai canvas)
+    const qrUrl = `${window.location.origin}/detail/${slug}`;
+    const qrCanvas = document.createElement('canvas');
+    await QRCode.toCanvas(qrCanvas, qrUrl);
+    const blob = await new Promise(resolve => qrCanvas.toBlob(resolve, 'image/png'));
+
+    // Upload QR to Supabase
+    const qrPath = `qrs/${Date.now()}_${slug}.png`;
+    const { error: qrUploadError } = await supabase.storage
+        .from('qrcodes')
+        .upload(qrPath, blob);
+
+    if (qrUploadError) {
+        console.error("QR Upload Error:", qrUploadError.message);
+    }
+
+    // Simpan produk
+    await supabase.from('products').insert([{
+        name, price, image_url: imageUrl, category_id: categoryId, barcode
+    }]);
+
+    toggleModal('product', false);
+    loadProducts();
+    loadCategoryOptions();
+
+    saveBtn.disabled = false;
+    spinner.classList.add('hidden');
+}
 
 // Modal toggle
 function toggleModal(id, show) {

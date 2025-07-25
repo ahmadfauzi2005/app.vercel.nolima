@@ -8,15 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
-<!-- detail.html -->
-<body>
-    <div id="product-detail"></div>
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-        const supabase = createClient('https://kpspglomfamxnhhopecp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE');
+<body onload="loadDetail()">
+    <div id="product-detail" class="p-4 text-center"></div>
 
-        const params = new URLSearchParams(window.location.search);
-        const slug = params.get('slug');
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        const supabase = supabase.createClient('https://kpspglomfamxnhhopecp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE');
+        const slug = window.location.pathname.split('/').pop();
 
         async function loadDetail() {
             const { data, error } = await supabase
@@ -27,16 +25,14 @@
 
             if (data) {
                 document.getElementById('product-detail').innerHTML = `
-                    <h1>${data.name}</h1>
-                    <img src="${data.image_url}" width="200"/>
-                    <p>Harga: Rp${data.price.toLocaleString('id-ID')}</p>
+                    <h1 class="text-2xl font-bold">${data.name}</h1>
+                    <img src="${data.image_url}" class="mx-auto w-64 my-4"/>
+                    <p class="text-lg font-semibold">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
                 `;
             } else {
-                document.getElementById('product-detail').innerText = 'Product not found';
+                document.getElementById('product-detail').innerText = 'Produk tidak ditemukan';
             }
         }
-
-        loadDetail();
     </script>
 </body>
 
