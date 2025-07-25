@@ -101,20 +101,62 @@ async function loadProducts() {
         const categoryName = p.categories ? p.categories.name : 'Uncategorized';
         const barcodeText = p.barcode || '-';
 
-        const barcodeDownloadLink = p.barcode
-            ? `<a href="data:text/plain;charset=utf-8,${encodeURIComponent(barcodeText)}" download="barcode-${p.id}.txt" class="text-indigo-600 underline">Download</a>`
-            : '-';
+        const barcodeId = `barcode-${p.id}`;
+        const canvasId = `canvas-${p.id}`;
 
         table.innerHTML += `<tr>
             <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
             <td>${p.name}</td>
             <td>${categoryName}</td>
             <td>Rp${p.price.toLocaleString('id-ID')}</td>
-            <td>${barcodeDownloadLink}</td>
+            <td>
+                ${p.barcode ? `
+                    <svg id="${barcodeId}"></svg>
+                    <button onclick="downloadBarcode('${barcodeId}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
+                ` : '-'}
+            </td>
             <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td>
         </tr>`;
+
+        // Generate barcode image
+        if (p.barcode) {
+            setTimeout(() => {
+                JsBarcode(`#${barcodeId}`, p.barcode, {
+                    format: "CODE128",
+                    lineColor: "#000",
+                    width: 2,
+                    height: 40,
+                    displayValue: true
+                });
+            }, 0);
+        }
     });
 }
+function downloadBarcode(svgId, name) {
+    const svgElement = document.getElementById(svgId);
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+
+    const image = new Image();
+    image.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0);
+
+        const pngUrl = canvas.toDataURL("image/png");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = `barcode-${name}.png`;
+        downloadLink.click();
+
+        URL.revokeObjectURL(url);
+    };
+    image.src = url;
+}
+
 
 
 
