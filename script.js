@@ -129,6 +129,10 @@ async function saveProduct(e) {
     const categoryId = parseInt(document.getElementById('product-category').value);
     const file = document.getElementById('product-image').files[0];
 
+    // Generate slug for barcode
+    const slug = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+    const barcode = `/${slug}`;
+
     let imageUrl = '';
     if (file) {
         const filePath = `images/${Date.now()}_${file.name}`;
@@ -147,7 +151,11 @@ async function saveProduct(e) {
     }
 
     await supabase.from('products').insert([{
-        name, price, image_url: imageUrl, category_id: categoryId
+        name,
+        price,
+        image_url: imageUrl,
+        category_id: categoryId,
+        barcode // ⬅️ Simpan barcode
     }]);
 
     toggleModal('product', false);
