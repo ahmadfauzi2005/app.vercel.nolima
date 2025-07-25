@@ -41,7 +41,7 @@ async function loadShopProducts() {
             <a href="shop-details.html">${name}</a>
           </div>
           <div class="text-sm text-gray-500 mb-1">${category}</div>
-          <div class="product-price text-indigo-700 font-bold">Rp${p.price.toLocaleString('id-ID')}</div>
+          <div class="product-price text-indigo-700 font-bold">Rp${price.toLocaleString('id-ID')}</div>
         </div>
       </div>`;
     });
