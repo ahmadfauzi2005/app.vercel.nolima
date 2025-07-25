@@ -88,13 +88,6 @@ async function loadCategoryOptions() {
         select.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
     });
 }
-function generateSlug(name) {
-    return name.toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, '')   // hapus karakter aneh
-        .replace(/\s+/g, '-')           // ganti spasi dengan -
-        .replace(/-+/g, '-');           // hapus duplikat -
-}
 
 async function loadProducts() {
     const { data } = await supabase
