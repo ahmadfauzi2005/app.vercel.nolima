@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Product Detail</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
-<body class="p-4 text-center text-lg">
+<body class="p-6 text-center text-lg">
 
 <div id="product-detail">Loading...</div>
 
-<script>
-const slug = window.location.pathname.split('/').pop();
-const supabase = supabase.createClient(
-    'https://kpspglomfamxnhhopecp.supabase.co', 
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE'
-);
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-async function loadDetail() {
-    const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('barcode', slug)
-        .single();
+    const supabaseUrl = 'https://kpspglomfamxnhhopecp.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE'; // gunakan key kamu
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    if (data) {
-        document.getElementById('product-detail').innerHTML = `
-            <h1 class="text-2xl font-bold mb-2">${data.name}</h1>
-            <img src="${data.image_url}" class="mx-auto w-64 h-auto my-4"/>
-            <p class="text-lg font-semibold mb-4">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
-            <a href="https://wa.me/6283142436491?text=Halo, saya tertarik dengan produk *${data.name}*" 
-               class="bg-green-500 text-white px-4 py-2 rounded">Order via WhatsApp</a>
-        `;
-    } else {
-        document.getElementById('product-detail').innerHTML = `
-            <p class="text-red-600 font-bold">Produk tidak ditemukan!</p>`;
+    const slug = window.location.hash.substring(1);  // ambil slug dari #namaproduk
+    const detailDiv = document.getElementById('product-detail');
+
+    async function loadDetail() {
+        if (!slug) {
+            detailDiv.innerHTML = '<p class="text-red-600 font-bold">Produk tidak ditemukan!</p>';
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('barcode', slug)
+            .single();
+
+        if (data) {
+            detailDiv.innerHTML = `
+                <h1 class="text-2xl font-bold mb-4">${data.name}</h1>
+                <img src="${data.image_url}" alt="${data.name}" class="mx-auto w-64 h-auto mb-4"/>
+                <p class="text-lg font-semibold mb-4">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
+                <a href="https://wa.me/6283142436491?text=Halo, saya tertarik dengan produk *${encodeURIComponent(data.name)}*" 
+                   class="bg-green-500 text-white px-4 py-2 rounded">Order via WhatsApp</a>
+            `;
+        } else {
+            detailDiv.innerHTML = '<p class="text-red-600 font-bold">Produk tidak ditemukan!</p>';
+        }
     }
-}
-loadDetail();
+
+    loadDetail();
 </script>
 
 </body>
