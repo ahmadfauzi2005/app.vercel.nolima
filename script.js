@@ -224,4 +224,3 @@ function toggleModal(id, show) {
 loadCategories();
 loadProducts();
 loadCategoryOptions();
-downloadQR();
