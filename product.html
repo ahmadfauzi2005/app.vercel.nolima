@@ -573,6 +573,27 @@
                             </ul>
                         </div>
                     </div>
+                    <div>
+                        <h3>Peta Lokasi Saya</h3>
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  // Koordinat awal (contoh: Jakarta)
+  var map = L.map('map').setView([-6.200000, 106.816666], 13);
+
+  // Tambahkan tile dari OpenStreetMap
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // Tambahkan marker
+  var marker = L.marker([-6.200000, 106.816666]).addTo(map);
+  marker.bindPopup("<b>Halo!</b><br>Ini Jakarta.").openPopup();
+</script>
+                    </div>
                     <!-- <div class="col-lg-3 col-md-6 col-sm-6">
                         <div class="footer-widget footer1-widget footer1-widget4 mb-40 ">
                             <div class="footer-widget-title">
