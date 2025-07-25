@@ -99,14 +99,23 @@ async function loadProducts() {
     data.forEach(p => {
         const imageUrl = p.image_url;
         const categoryName = p.categories ? p.categories.name : 'Uncategorized';
+        const barcodeText = p.barcode || '-';
+
+        const barcodeDownloadLink = p.barcode
+            ? `<a href="data:text/plain;charset=utf-8,${encodeURIComponent(barcodeText)}" download="barcode-${p.id}.txt" class="text-indigo-600 underline">Download</a>`
+            : '-';
+
         table.innerHTML += `<tr>
             <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
             <td>${p.name}</td>
             <td>${categoryName}</td>
             <td>Rp${p.price.toLocaleString('id-ID')}</td>
-            <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td></tr>`;
+            <td>${barcodeDownloadLink}</td>
+            <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td>
+        </tr>`;
     });
 }
+
 
 
 window.deleteProduct = async (id) => {
