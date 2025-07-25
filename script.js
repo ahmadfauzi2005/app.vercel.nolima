@@ -96,13 +96,11 @@ async function loadProducts() {
 
     const table = document.getElementById('products-table');
     table.innerHTML = '';
+    
     data.forEach(p => {
         const imageUrl = p.image_url;
         const categoryName = p.categories ? p.categories.name : 'Uncategorized';
-        const barcodeText = p.barcode || '-';
-
-        const barcodeId = `barcode-${p.id}`;
-        const canvasId = `canvas-${p.id}`;
+        const qrCodeUrl = p.barcode;  // barcode berisi URL QR image
 
         table.innerHTML += `<tr>
             <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
@@ -110,51 +108,23 @@ async function loadProducts() {
             <td>${categoryName}</td>
             <td>Rp${p.price.toLocaleString('id-ID')}</td>
             <td>
-                ${p.barcode ? `
-                    <svg id="${barcodeId}"></svg>
-                    <button onclick="downloadBarcode('${barcodeId}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
+                ${qrCodeUrl ? `
+                    <img src="${qrCodeUrl}" class="w-16 h-16 mx-auto"/>
+                    <button onclick="downloadQR('${qrCodeUrl}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
                 ` : '-'}
             </td>
             <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td>
         </tr>`;
-
-        // Generate barcode image
-        if (p.barcode) {
-            setTimeout(() => {
-                JsBarcode(`#${barcodeId}`, p.barcode, {
-                    format: "CODE128",
-                    lineColor: "#000",
-                    width: 2,
-                    height: 40,
-                    displayValue: true
-                });
-            }, 0);
-        }
     });
 }
-function downloadBarcode(svgId, name) {
-    const svgElement = document.getElementById(svgId);
-    const svgData = new XMLSerializer().serializeToString(svgElement);
-    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
 
-    const image = new Image();
-    image.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = image.width;
-        canvas.height = image.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(image, 0, 0);
-
-        const pngUrl = canvas.toDataURL("image/png");
-        const downloadLink = document.createElement("a");
-        downloadLink.href = pngUrl;
-        downloadLink.download = `barcode-${name}.png`;
-        downloadLink.click();
-
-        URL.revokeObjectURL(url);
-    };
-    image.src = url;
+function downloadQR(qrUrl, name) {
+    const link = document.createElement('a');
+    link.href = qrUrl;
+    link.download = `qrcode-${name}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 
@@ -166,6 +136,7 @@ window.deleteProduct = async (id) => {
         loadProducts();
     }
 };
+
 
 async function saveProduct(e) {
     e.preventDefault();
@@ -179,10 +150,6 @@ async function saveProduct(e) {
     const price = parseFloat(document.getElementById('product-price').value);
     const categoryId = parseInt(document.getElementById('product-category').value);
     const file = document.getElementById('product-image').files[0];
-
-    // Generate slug for barcode
-    const slug = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-    const barcode = `/${slug}`;
 
     let imageUrl = '';
     if (file) {
@@ -201,12 +168,36 @@ async function saveProduct(e) {
         }
     }
 
+    // Generate product URL and QR Code
+    const slug = name.replace(/\s+/g, '-').toLowerCase();
+    const productUrl = `${window.location.origin}/${slug}`;
+
+    // Generate QR Code as Blob
+    const qrCanvas = document.createElement('canvas');
+    await QRCode.toCanvas(qrCanvas, productUrl);
+    const blob = await new Promise(resolve => qrCanvas.toBlob(resolve));
+
+    // Upload QR Code Blob to Supabase Storage
+    const qrPath = `qrcodes/${Date.now()}_${slug}.png`;
+    const { data: qrUpload, error: qrError } = await supabase.storage
+        .from('products')
+        .upload(qrPath, blob);
+
+    let qrUrl = '';
+    if (!qrError) {
+        const { data: qrPublic } = supabase.storage.from('products').getPublicUrl(qrPath);
+        qrUrl = qrPublic.publicUrl;
+    } else {
+        console.error('QR upload error:', qrError.message);
+    }
+
+    // Save product with QR code URL
     await supabase.from('products').insert([{
         name,
         price,
         image_url: imageUrl,
         category_id: categoryId,
-        barcode // ⬅️ Simpan barcode
+        barcode: qrUrl  // Save QR image URL here
     }]);
 
     toggleModal('product', false);
@@ -216,7 +207,6 @@ async function saveProduct(e) {
     saveBtn.disabled = false;
     spinner.classList.add('hidden');
 }
-
 
 
 // Modal toggle
