@@ -92,14 +92,13 @@ async function loadCategoryOptions() {
 async function loadProducts() {
     const { data } = await supabase
         .from('products')
-        .select('*, categories(name)');
+        .select('*, categories(name)'); // join category
 
     const table = document.getElementById('products-table');
     table.innerHTML = '';
     data.forEach(p => {
         const imageUrl = p.image_url;
         const categoryName = p.categories ? p.categories.name : 'Uncategorized';
-        const qrUrl = p.barcode || '';
 
         table.innerHTML += `<tr>
             <td><img src="${imageUrl}" class="w-16 h-16 mx-auto"/></td>
@@ -107,26 +106,24 @@ async function loadProducts() {
             <td>${categoryName}</td>
             <td>Rp${p.price.toLocaleString('id-ID')}</td>
             <td>
-                ${qrUrl ? `
-                    <img src="${qrUrl}" class="w-16 h-16 mx-auto" alt="QR Code"/>
-                    <button onclick="downloadQR('${qrUrl}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
+                ${p.qr_url ? `
+                    <img src="${p.qr_url}" class="w-16 h-16 mx-auto" alt="QR Code"/>
+                    <button onclick="downloadQR('${p.qr_url}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
                 ` : '-'}
             </td>
             <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td>
         </tr>`;
     });
 }
-function downloadQR(url, name) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `qrcode-${name}.png`;
+
+function downloadQR(imgUrl, name) {
+    const link = document.createElement("a");
+    link.href = imgUrl;
+    link.download = `qr-${name}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
-
-
-
 
 
 window.deleteProduct = async (id) => {
@@ -135,7 +132,6 @@ window.deleteProduct = async (id) => {
         loadProducts();
     }
 };
-
 
 async function saveProduct(e) {
     e.preventDefault();
@@ -149,58 +145,41 @@ async function saveProduct(e) {
     const price = parseFloat(document.getElementById('product-price').value);
     const categoryId = parseInt(document.getElementById('product-category').value);
     const file = document.getElementById('product-image').files[0];
+    const slug = name.toLowerCase().replace(/\s+/g, '');
 
-    let imageUrl = '';
-    let qrUrl = '';
+    let imageUrl = '', qrUrl = '';
 
     try {
-        // Upload gambar produk
+        // Upload product image
         if (file) {
             const filePath = `images/${Date.now()}_${file.name}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('products')
-                .upload(filePath, file);
-
+            const { data: uploadData, error: uploadError } = await supabase.storage.from('products').upload(filePath, file);
             if (!uploadError) {
-                const { data: publicData } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(filePath);
-                imageUrl = publicData.publicUrl;
+                imageUrl = supabase.storage.from('products').getPublicUrl(filePath).data.publicUrl;
             } else {
                 console.error("Upload error:", uploadError.message);
             }
         }
 
-        // Generate QR Code sebagai Blob PNG
+        // Generate QR Code to detail.html?slug=...
         const qrCanvas = document.createElement('canvas');
-        await QRCode.toCanvas(qrCanvas, `${window.location.origin}/${name}`, {
-            width: 256,
-        });
+        const qrLink = `${window.location.origin}/detail.html?slug=${slug}`;
 
+        await QRCode.toCanvas(qrCanvas, qrLink);
         const blob = await new Promise(resolve => qrCanvas.toBlob(resolve, 'image/png'));
-        const qrPath = `qrs/${Date.now()}_${name}.png`;
+        const qrPath = `qrs/${Date.now()}_${slug}.png`;
 
-        // Upload QR ke bucket "qrcodes"
-        const { data: qrUploadData, error: qrUploadError } = await supabase.storage
-            .from('qrcodes')
-            .upload(qrPath, blob);
-
+        const { error: qrUploadError } = await supabase.storage.from('qrcodes').upload(qrPath, blob);
         if (!qrUploadError) {
-            const { data: qrPublicData } = supabase.storage
-                .from('qrcodes')
-                .getPublicUrl(qrPath);
-            qrUrl = qrPublicData.publicUrl;
+            qrUrl = supabase.storage.from('qrcodes').getPublicUrl(qrPath).data.publicUrl;
         } else {
             console.error("QR Upload Error:", qrUploadError.message);
         }
 
-        // Simpan produk ke database
+        // Save to products table
         await supabase.from('products').insert([{
-            name,
-            price,
-            image_url: imageUrl,
-            category_id: categoryId,
-            barcode: qrUrl
+            name, price, image_url: imageUrl, category_id: categoryId,
+            barcode: slug, qr_url: qrUrl
         }]);
 
         toggleModal('product', false);
@@ -212,7 +191,6 @@ async function saveProduct(e) {
         spinner.classList.add('hidden');
     }
 }
-
 
 
 // Modal toggle

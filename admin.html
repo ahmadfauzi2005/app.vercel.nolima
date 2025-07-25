@@ -159,7 +159,14 @@
         overlay.addEventListener('click', () => {
             closeSidebar();
         });
-
+        function downloadQR(imgUrl, name) {
+            const downloadLink = document.createElement("a");
+            downloadLink.href = imgUrl;
+            downloadLink.download = `qr-${name}.png`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
     </script>
 </body>
 
