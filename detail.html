@@ -1,19 +1,21 @@
-<!-- detail.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Product Detail</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title>Product Detail</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
 </head>
-<body onload="loadDetail()">
-   <div id="product-detail" class="p-4 text-center text-lg">Loading...</div>
+<body class="p-4 text-center text-lg">
+
+<div id="product-detail">Loading...</div>
 
 <script>
 const slug = window.location.pathname.split('/').pop();
-const supabase = supabase.createClient('https://kpspglomfamxnhhopecp.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE');
+const supabase = supabase.createClient(
+    'https://kpspglomfamxnhhopecp.supabase.co', 
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE'
+);
 
 async function loadDetail() {
     const { data, error } = await supabase
@@ -24,17 +26,19 @@ async function loadDetail() {
 
     if (data) {
         document.getElementById('product-detail').innerHTML = `
-            <h1 class="text-2xl font-bold">${data.name}</h1>
-            <img src="${data.image_url}" class="mx-auto w-64 my-4"/>
-            <p class="text-lg font-semibold">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
+            <h1 class="text-2xl font-bold mb-2">${data.name}</h1>
+            <img src="${data.image_url}" class="mx-auto w-64 h-auto my-4"/>
+            <p class="text-lg font-semibold mb-4">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
+            <a href="https://wa.me/6283142436491?text=Halo, saya tertarik dengan produk *${data.name}*" 
+               class="bg-green-500 text-white px-4 py-2 rounded">Order via WhatsApp</a>
         `;
     } else {
-        document.getElementById('product-detail').innerText = 'Produk tidak ditemukan';
+        document.getElementById('product-detail').innerHTML = `
+            <p class="text-red-600 font-bold">Produk tidak ditemukan!</p>`;
     }
 }
 loadDetail();
 </script>
 
 </body>
-
 </html>
