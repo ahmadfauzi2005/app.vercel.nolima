@@ -8,80 +8,88 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
-<body class="bg-gray-100 flex">
+<body class="bg-gray-100 flex flex-col md:flex-row min-h-screen">
     <!-- Sidebar -->
-    <div class="w-64 bg-white h-screen p-4 shadow flex flex-col">
+    <div class="w-full md:w-64 bg-white md:h-screen p-4 shadow-md flex flex-col">
         <h2 class="text-xl font-bold text-indigo-600 mb-6">Admin Panel</h2>
         <nav class="flex-1 space-y-2">
             <button id="show-dashboard"
-                class="w-full text-left px-4 py-2 hover:bg-indigo-100 rounded">Dashboard</button>
+                class="w-full text-left px-4 py-2 hover:bg-indigo-100 hover:text-indigo-600 rounded transition">Dashboard</button>
             <button id="show-categories"
-                class="w-full text-left px-4 py-2 hover:bg-indigo-100 rounded">Categories</button>
-            <button id="show-products" class="w-full text-left px-4 py-2 hover:bg-indigo-100 rounded">Products</button>
+                class="w-full text-left px-4 py-2 hover:bg-indigo-100 hover:text-indigo-600 rounded transition">Categories</button>
+            <button id="show-products"
+                class="w-full text-left px-4 py-2 hover:bg-indigo-100 hover:text-indigo-600 rounded transition">Products</button>
         </nav>
     </div>
 
     <!-- Main Content -->
-    <div class="flex-1 p-6 overflow-y-auto">
-        <h1 class="text-2xl font-bold mb-4" id="page-title">Dashboard</h1>
+    <div class="flex-1 p-6 overflow-y-auto bg-gray-50">
+        <h1 class="text-2xl font-bold mb-4 text-gray-700" id="page-title">Dashboard</h1>
 
-        <div id="dashboard-section">
+        <div id="dashboard-section" class="text-gray-600">
             <p>Welcome, Admin! Use the menu to manage your store.</p>
         </div>
 
         <div id="categories-section" class="hidden">
-            <button id="add-category" class="bg-indigo-600 text-white px-4 py-2 rounded mb-4">Add Category</button>
-            <table class="min-w-full bg-white">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="py-2 px-4">Name</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="categories-table" class="text-center"></tbody>
-            </table>
+            <button id="add-category"
+                class="bg-indigo-600 text-white px-4 py-2 rounded mb-4 hover:bg-indigo-700 transition">Add Category</button>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded shadow-md overflow-hidden">
+                    <thead class="bg-gray-200 text-gray-700">
+                        <tr>
+                            <th class="py-2 px-4 text-left">Name</th>
+                            <th class="text-left">Status</th>
+                            <th class="text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-table" class="text-gray-600"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="products-section" class="hidden">
-            <button id="add-product" class="bg-indigo-600 text-white px-4 py-2 rounded mb-4">Add Product</button>
-            <table class="min-w-full bg-white">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th>Image</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="products-table" class="text-center"></tbody>
-            </table>
+            <button id="add-product"
+                class="bg-indigo-600 text-white px-4 py-2 rounded mb-4 hover:bg-indigo-700 transition">Add Product</button>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded shadow-md overflow-hidden">
+                    <thead class="bg-gray-200 text-gray-700">
+                        <tr>
+                            <th class="py-2 px-4 text-left">Image</th>
+                            <th class="text-left">Name</th>
+                            <th class="text-left">Category</th>
+                            <th class="text-left">Price</th>
+                            <th class="text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table" class="text-gray-600"></tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <!-- Modals -->
 
     <!-- CATEGORY MODAL -->
-    <div id="category-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <h2 class="text-xl font-bold mb-4">Category</h2>
+    <div id="category-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Category</h2>
             <form id="category-form" class="space-y-3">
                 <input type="hidden" id="category-id">
-                <input id="category-name" placeholder="Name" class="border w-full p-2 rounded" required>
-                <select id="category-status" class="border w-full p-2 rounded">
+                <input id="category-name" placeholder="Name" class="border w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <select id="category-status" class="border w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                 </select>
                 <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" id="cancel-category" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+                    <button type="button" id="cancel-category"
+                        class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition">Cancel</button>
                     <button id="save-category-btn" type="submit"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2">
+                        class="bg-indigo-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 hover:bg-indigo-700 transition">
                         <span>Save</span>
                         <svg id="category-spinner" class="hidden animate-spin h-4 w-4 text-white"
                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                         </svg>
                     </button>
                 </div>
@@ -90,36 +98,35 @@
     </div>
 
     <!-- PRODUCT MODAL -->
-    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <h2 class="text-xl font-bold mb-4">Product</h2>
+    <div id="product-modal"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Product</h2>
             <form id="product-form" class="space-y-3">
                 <input type="hidden" id="product-id">
-                <input id="product-name" placeholder="Name" class="border w-full p-2 rounded" required>
-                <input id="product-price" type="number" placeholder="Price" class="border w-full p-2 rounded" required>
-                <input type="file" id="product-image" class="w-full p-2 border rounded" accept="image/*">
-                <select id="product-category" class="border w-full p-2 rounded" required>
+                <input id="product-name" placeholder="Name" class="border w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <input id="product-price" type="number" placeholder="Price" class="border w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <input type="file" id="product-image" class="w-full p-2 border rounded focus:outline-none" accept="image/*">
+                <select id="product-category" class="border w-full p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                     <option value="">Select Category</option>
                     <!-- Populated by JS -->
                 </select>
                 <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" id="cancel-product" class="bg-gray-300 px-4 py-2 rounded">Cancel</button>
+                    <button type="button" id="cancel-product"
+                        class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition">Cancel</button>
                     <button id="save-product-btn" type="submit"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2">
+                        class="bg-indigo-600 text-white px-4 py-2 rounded flex items-center justify-center gap-2 hover:bg-indigo-700 transition">
                         <span>Save</span>
                         <svg id="product-spinner" class="hidden animate-spin h-4 w-4 text-white"
                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
                         </svg>
                     </button>
                 </div>
             </form>
         </div>
     </div>
-
-    <!-- JS Module -->
-    <script type="module" src="script.js"></script>
 </body>
-
 </html>

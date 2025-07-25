@@ -17,7 +17,7 @@ async function loadShopProducts() {
     data.forEach(product => {
         const image = product.image_url || 'assets/img/default.jpg';
         const name = product.name || 'No Name';
-        const price = product.price ? `£${product.price.toFixed(2)}` : 'N/A';
+        const price = product.price || 'No price';
         const category = product.categories?.name || 'Uncategorized';
 
         container.innerHTML += `
