@@ -7,45 +7,49 @@
 </head>
 <body class="p-6 text-center text-lg">
 
-<div id="product-detail">Loading...</div>
+<div id="product-detail" class="max-w-md mx-auto mt-8 text-center">
+    <!-- Produk akan tampil di sini -->
+</div>
 
 <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    const supabaseUrl = 'https://kpspglomfamxnhhopecp.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = 'https://kpspglomfamxnhhopecp.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtwc3BnbG9tZmFteG5oaG9wZWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzNjgyMDgsImV4cCI6MjA2ODk0NDIwOH0.3gwysVcLzH8iV1i_IY6PhbkDHU5Mf_Tp-T-Dq26ZHAE';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const pathParts = window.location.pathname.split('/');
-    const slug = pathParts[pathParts.length - 1];  // ambil slug dari /detail/namaproduk
-    const detailDiv = document.getElementById('product-detail');
+// Ambil slug dari hash di URL
+const slug = window.location.hash.substring(1);
+const detailDiv = document.getElementById('product-detail');
 
-    async function loadDetail() {
-        if (!slug) {
-            detailDiv.innerHTML = '<p class="text-red-600 font-bold">Produk tidak ditemukan!</p>';
-            return;
-        }
-
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('barcode', slug)
-            .single();
-
-        if (data) {
-            detailDiv.innerHTML = `
-                <h1 class="text-2xl font-bold mb-4">${data.name}</h1>
-                <img src="${data.image_url}" alt="${data.name}" class="mx-auto w-64 h-auto mb-4"/>
-                <p class="text-lg font-semibold mb-4">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
-                <a href="https://wa.me/6283142436491?text=Halo, saya tertarik dengan produk *${encodeURIComponent(data.name)}*" 
-                   class="bg-green-500 text-white px-4 py-2 rounded">Order via WhatsApp</a>
-            `;
-        } else {
-            detailDiv.innerHTML = '<p class="text-red-600 font-bold">Produk tidak ditemukan!</p>';
-        }
+async function loadDetail() {
+    if (!slug) {
+        detailDiv.innerHTML = '<p class="text-red-600 font-bold">Produk tidak ditemukan!</p>';
+        return;
     }
 
-    loadDetail();
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('barcode', slug)
+        .single();
+
+    if (error || !data) {
+        detailDiv.innerHTML = '<p class="text-red-600 font-bold">Produk tidak ditemukan!</p>';
+        return;
+    }
+
+    detailDiv.innerHTML = `
+        <h1 class="text-2xl font-bold mb-4">${data.name}</h1>
+        <img src="${data.image_url}" alt="${data.name}" class="mx-auto w-64 h-auto mb-4"/>
+        <p class="text-lg font-semibold mb-4">Harga: Rp${data.price.toLocaleString('id-ID')}</p>
+        <a href="https://wa.me/6283142436491?text=Halo, saya tertarik dengan produk *${encodeURIComponent(data.name)}*" 
+           class="bg-green-500 text-white px-4 py-2 rounded">Order via WhatsApp</a>
+    `;
+}
+
+loadDetail();
+
 </script>
 
 </body>

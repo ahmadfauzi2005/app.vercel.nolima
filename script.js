@@ -109,8 +109,7 @@ async function loadProducts() {
             <td>Rp${p.price.toLocaleString('id-ID')}</td>
             <td>
                 ${p.barcode ? `
-                    <canvas id="${qrCanvasId}" width="100" height="100"></canvas><br>
-                    <button onclick="downloadQR('${qrCanvasId}', '${p.name}')" class="text-indigo-600 underline text-sm mt-1">Download</button>
+                    <canvas id="${qrCanvasId}" width="100px"></canvas><br>
                 ` : '-'}
             </td>
             <td><button onclick="deleteProduct(${p.id})" class="text-red-600">Delete</button></td>
